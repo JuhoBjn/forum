@@ -19,13 +19,17 @@ Forum is a full-stack web project I'm making to improve my skills with web-devel
 > Installation instructions can be found on the [Docker Website](https://www.docker.com/get-started/)
 
 * Create a file with name `.env` in the root of the project following the template below. Replace placeholder values with your own.
-```
-MYSQL_DATABASE=<your-database-name-here>
-MYSQL_ROOT_PASSWORD=<your-root-password-here>
-```
+  ```
+  MYSQL_DATABASE=<your-database-name-here>
+  MYSQL_ROOT_PASSWORD=<your-root-password-here>
+  ```
 * Start up the database containers by issuing the command `docker compose up -d`
 * Navigate to the `/backend` folder
 * Issue command `npm install` to install necessary Node modules
+* Create a file with name `.env` with the content below.
+  ```
+  PORT=5050
+  ```
 * Run `npm run start`
 
 Now, the backend of the project should be up and running. The database will be available at `localhost:3306` and the Adminer database management console will be available at `localhost:8080`.
