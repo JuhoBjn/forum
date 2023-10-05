@@ -41,7 +41,7 @@ jobs:
         run: |
           # Run DB migrations
           # npx -y dbmate -e TEST_DATABASE_URL --no-dump-schema up
-          mysql -h 127.0.0.1 -u root -ptestpass forum_database > ./db/test_data.sql
+          mysql -h 127.0.0.1 -u root -ptestpass forum_database < ./db/test_data.sql
 
       - name: Run tests
         working-directory: ./backend
