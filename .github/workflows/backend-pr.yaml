@@ -36,16 +36,23 @@ jobs:
         working-directory: ./backend
         run: npm run lint
 
-      - name: Set up MySQL database
+      - name: Start MySQL database
         uses: shogo82148/actions-setup-mysql@v1.23.0
         with:
           mysql-version: "8.1"
           root-password: $MYSQL_TEST_PASSWORD
+        
+      - name: Set up MySQL database
+        run: |
+          mysql -uroot -h $MYSQL_HOST -p$MYSQL_TEST_PASSWORD -e 'SELECT version()'
+          mysql -h $MYSQL_HOST -P $MYSQL_PORT -u root -e "CREATE DATABASE $MYSQL_DATABASE;"
+          mysql -h $DB_HOST -P $DB_PORT -u root -e "SHOW DATABASES;"
+          mysql -h $DB_HOST -P $DB_PORT -u root -e "FLUSH PRIVILEGES" -p$MYSQL_TEST_PASSWORD
 
       - name: Init DB
         run: |
           # Run DB migrations
-          # npx -y dbmate -e TEST_DATABASE_URL --no-dump-schema up
+          # npx -y dbmate -e $TEST_DATABASE_URL --no-dump-schema up
           mysql -h $MYSQL_HOST -P $MYSQL_PORT -u root -p$MYSQL_TEST_PASSWORD $MYSQL_DATABASE < ./db/test_data.sql
 
       - name: Run tests
