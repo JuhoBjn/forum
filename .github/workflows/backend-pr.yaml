@@ -37,11 +37,10 @@ jobs:
         run: npm run lint
 
       - name: Set up MySQL database
-        uses: mirromutth/mysql-action@v1.1
+        uses: shogo82148/actions-setup-mysql@v1.23.0
         with:
-          mysql version: "8.1"
-          mysql database: "forum_database"
-          mysql root password: testpass
+          mysql-version: "8.1"
+          root-password: $MYSQL_TEST_PASSWORD
 
       - name: Init DB
         run: |
