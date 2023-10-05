@@ -1,0 +1,65 @@
+name: Backend PR
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - backend/**
+      - .github/workflows/backend-pr.yml
+
+env:
+  MYSQL_HOST: 127.0.0.1
+  MYSQL_PORT: 3306
+  MYSQL_DATABASE: forum_database
+  MYSQL_TEST_PASSWORD: ${{ secrets.MYSQL_TEST_PASSWORD }}
+  TEST_DATABASE_URL: "mysql://root:$MYSQL_TEST_PASSWORD@127.0.0.1:3306/forum_database"
+  JWT_KEY: ${{ secrets.JWT_KEY }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Installs Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Lint code
+        working-directory: ./backend
+        run: npm run lint
+
+      - name: Start MySQL database
+        uses: shogo82148/actions-setup-mysql@v1.23.0
+        with:
+          mysql-version: "8.1"
+          root-password: $MYSQL_TEST_PASSWORD
+        
+      - name: Set up MySQL database
+        run: |
+          mysql -uroot -h $MYSQL_HOST -p$MYSQL_TEST_PASSWORD -e 'SELECT version()'
+          mysql -h $MYSQL_HOST -P $MYSQL_PORT -u root -e "CREATE DATABASE $MYSQL_DATABASE;"
+          mysql -h $DB_HOST -P $DB_PORT -u root -e "SHOW DATABASES;"
+          mysql -h $DB_HOST -P $DB_PORT -u root -e "FLUSH PRIVILEGES" -p$MYSQL_TEST_PASSWORD
+
+      - name: Init DB
+        run: |
+          # Run DB migrations
+          # npx -y dbmate -e $TEST_DATABASE_URL --no-dump-schema up
+          mysql -h $MYSQL_HOST -P $MYSQL_PORT -u root -p$MYSQL_TEST_PASSWORD $MYSQL_DATABASE < ./db/test_data.sql
+
+      - name: Run tests
+        working-directory: ./backend
+        run: npm run test:ci
+
+      - name: Upload test coverage to Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          base-path: ./backend/coverage
