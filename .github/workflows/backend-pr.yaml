@@ -8,6 +8,14 @@ on:
       - backend/**
       - .github/workflows/backend-pr.yml
 
+env:
+  MYSQL_HOST: 127.0.0.1
+  MYSQL_PORT: 3306
+  MYSQL_DATABASE: forum_database
+  MYSQL_TEST_PASSWORD: ${{ secrets.MYSQL_TEST_PASSWORD }}
+  TEST_DATABASE_URL: "mysql://root:$MYSQL_TEST_PASSWORD@127.0.0.1:3306/forum_database"
+  JWT_KEY: ${{ secrets.JWT_KEY }}
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -36,12 +44,10 @@ jobs:
           mysql root password: testpass
 
       - name: Init DB
-        env:
-          TEST_DATABASE_URL: "mysql://root:testpass@127.0.0.1:3306/forum_database"
         run: |
           # Run DB migrations
           # npx -y dbmate -e TEST_DATABASE_URL --no-dump-schema up
-          mysql -h 127.0.0.1 -u root -ptestpass forum_database < ./db/test_data.sql
+          mysql -h $MYSQL_HOST -P $MYSQL_PORT -u root -p$MYSQL_TEST_PASSWORD $MYSQL_DATABASE < ./db/test_data.sql
 
       - name: Run tests
         working-directory: ./backend
